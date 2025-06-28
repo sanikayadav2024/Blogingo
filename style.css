@@ -1,0 +1,12 @@
+*{
+    margin: 0%;
+    padding: 0%;
+}
+.navbar{
+    height: 20px;
+    width: 100%;
+    margin: 10px;
+    background-color: #d094f1;
+    list-style: none;
+    color: black;
+}
