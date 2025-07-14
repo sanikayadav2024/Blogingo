@@ -194,7 +194,11 @@
             <div class="blog-grid">
                 <% try {
                     Class.forName("com.mysql.cj.jdbc.Driver");
-                    Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/bloggingo", "root", "");
+                    Connection conn = DriverManager.getConnection(
+    System.getenv("DB_URL"),
+    System.getenv("DB_USER"),
+    System.getenv("DB_PASS")
+);
                     String sql = "SELECT * FROM public_blogs WHERE author='Admin' ORDER BY created_at DESC";
                     PreparedStatement ps = conn.prepareStatement(sql);
                     ResultSet rs = ps.executeQuery();
