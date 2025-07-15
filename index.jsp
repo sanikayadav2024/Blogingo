@@ -190,9 +190,9 @@
         <% } %>
 
         <% if (user == null) { %>
-            <h2 class="mb-4">Public Blogs</h2>
-            <div class="blog-grid">
-             <%
+           <h2 class="mb-4">Public Blogs</h2>
+<div class="blog-grid">
+<%
 try {
     Class.forName("com.mysql.cj.jdbc.Driver");
 
@@ -207,22 +207,37 @@ try {
         out.println("<p>DB_PASS = " + (dbPass != null ? "****" : "null") + "</p>");
     } else {
         Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPass);
-        // ... Your code to run the SQL query ...
- while (rs.next()) { hasPublicBlogs = true; %>
-                        <div class="blog">
-                            <h4><%= rs.getString("title") %></h4>
-                            <p><%= rs.getString("content") %></p>
-                            <small class="text-muted">Author: <%= rs.getString("author") %> | Posted on: <%= rs.getString("created_at") %></small>
-                            <br><a href="welcome.jsp" class="read-more">Read More</a>
-                        </div>
+        String sql = "SELECT * FROM public_blogs ORDER BY created_at DESC";
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ResultSet rs = ps.executeQuery();
+        boolean hasPublicBlogs = false;
+
+        while (rs.next()) {
+            hasPublicBlogs = true;
+%>
+            <div class="blog">
+                <h4><%= rs.getString("title") %></h4>
+                <p><%= rs.getString("content") %></p>
+                <small class="text-muted">
+                    Author: <%= rs.getString("author") %> | Posted on: <%= rs.getString("created_at") %>
+                </small>
+                <br><a href="welcome.jsp" class="read-more">Read More</a>
+            </div>
+<%
+        }
+        if (!hasPublicBlogs) {
+            out.println("<p>No public blogs available at the moment.</p>");
+        }
+
+        rs.close();
+        ps.close();
+        conn.close();
     }
 } catch (Exception e) {
     out.println("<p class='text-danger'>Error: " + e.getMessage() + "</p>");
 }
 %>
-
-            </div>
-        <% } %>
+</div>
 
         <% if (user != null) { %>
     <div class="text-center">
