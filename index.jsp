@@ -115,8 +115,6 @@
 
 <body>
 <%@ include file="navbar.jsp" %>
-
-
 <div class="main-content container">
 
     <!-- Intro -->
