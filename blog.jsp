@@ -6,7 +6,6 @@
     <title>BloginGo - Blog Details</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-
     <style>
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
@@ -62,12 +61,6 @@
             transform: scale(1.05);
         }
 
-        .back-home {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-        }
-
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -78,6 +71,7 @@
 
 <%@ include file="navbar.jsp" %>
 
+<div class="blog-container">
 <%
     String blogId = request.getParameter("id");
     String username = (String) session.getAttribute("username");
@@ -106,60 +100,70 @@
                 rs = ps.executeQuery();
 
                 if (rs.next()) {
+                    String title = rs.getString("title");
+                    String content = rs.getString("content");
+                    String author = rs.getString("author");
+                    String createdAt = rs.getString("created_at");
+                    int likes = rs.getInt("likes");
+                    int unlikes = rs.getInt("unlikes");
 %>
-    <h2><%= rs.getString("title") %></h2>
-    <p class="blog-meta">By <%= rs.getString("author") %> | Posted on: <%= rs.getString("created_at") %></p>
+    <h2><%= title %></h2>
+    <p class="blog-meta">By <%= author %> | Posted on: <%= createdAt %></p>
     <hr>
-    <div class="blog-content"><%= rs.getString("content") %></div>
+    <div class="blog-content"><%= content %></div>
 
     <p class="likes-count">
-        <i class="bi bi-hand-thumbs-up-fill"></i> <strong><%= rs.getInt("likes") %></strong> Likes &nbsp;
-        <i class="bi bi-hand-thumbs-down-fill text-danger"></i> <strong><%= rs.getInt("unlikes") %></strong> Unlikes
+        <i class="bi bi-hand-thumbs-up-fill"></i> <strong><%= likes %></strong> Likes &nbsp;
+        <i class="bi bi-hand-thumbs-down-fill text-danger"></i> <strong><%= unlikes %></strong> Unlikes
     </p>
 
 <%
-                    PreparedStatement checkReaction = conn.prepareStatement("SELECT liked FROM blog_likes WHERE blog_id=? AND username=?");
-                    checkReaction.setString(1, blogId);
-                    checkReaction.setString(2, username);
-                    ResultSet reactionRs = checkReaction.executeQuery();
+                    if (username != null) {
+                        PreparedStatement checkReaction = conn.prepareStatement("SELECT liked FROM blog_likes WHERE blog_id=? AND username=?");
+                        checkReaction.setString(1, blogId);
+                        checkReaction.setString(2, username);
+                        ResultSet reactionRs = checkReaction.executeQuery();
 
-                    if (reactionRs.next()) {
-                        boolean liked = reactionRs.getBoolean("liked");
+                        if (reactionRs.next()) {
+                            boolean liked = reactionRs.getBoolean("liked");
 
-                        if (liked) {
+                            if (liked) {
 %>
-    <!-- Show Unlike Button -->
+    <!-- Unlike Button -->
     <form action="unlike_blog.jsp" method="post" style="display:inline;">
-        <input type="hidden" name="id" value="<%= rs.getString("id") %>">
+        <input type="hidden" name="id" value="<%= blogId %>">
         <button type="submit" class="btn btn-outline-danger btn-unlike">
             <i class="bi bi-hand-thumbs-down"></i> Unlike
         </button>
     </form>
 <%
+                            } else {
+%>
+    <!-- Like Button -->
+    <form action="like_blog.jsp" method="post" style="display:inline;">
+        <input type="hidden" name="id" value="<%= blogId %>">
+        <button type="submit" class="btn btn-success btn-like">
+            <i class="bi bi-hand-thumbs-up"></i> Like
+        </button>
+    </form>
+<%
+                            }
                         } else {
 %>
-    <!-- Show Like Button -->
+    <!-- First time - Like Button -->
     <form action="like_blog.jsp" method="post" style="display:inline;">
-        <input type="hidden" name="id" value="<%= rs.getString("id") %>">
+        <input type="hidden" name="id" value="<%= blogId %>">
         <button type="submit" class="btn btn-success btn-like">
             <i class="bi bi-hand-thumbs-up"></i> Like
         </button>
     </form>
 <%
                         }
+                        reactionRs.close();
+                        checkReaction.close();
                     } else {
-%>
-    <!-- First time - Show Like Button -->
-    <form action="like_blog.jsp" method="post" style="display:inline;">
-        <input type="hidden" name="id" value="<%= rs.getString("id") %>">
-        <button type="submit" class="btn btn-success btn-like">
-            <i class="bi bi-hand-thumbs-up"></i> Like
-        </button>
-    </form>
-<%
+                        out.println("<p class='text-muted'>Login to like or unlike this blog.</p>");
                     }
-                    reactionRs.close();
-                    checkReaction.close();
                 } else {
                     out.println("<p class='text-danger'>Blog not found.</p>");
                 }
@@ -170,46 +174,6 @@
             try { if (rs != null) rs.close(); } catch (Exception ignore) {}
             try { if (ps != null) ps.close(); } catch (Exception ignore) {}
             try { if (conn != null) conn.close(); } catch (Exception ignore) {}
-        }
-    }
-%>
-
-        <!-- Show Unlike Button -->
-        <form action="unlike_blog.jsp" method="post" style="display:inline;">
-            <input type="hidden" name="id" value="<%= rs.getString("id") %>">
-            <button type="submit" class="btn btn-outline-danger btn-unlike">
-                <i class="bi bi-hand-thumbs-down"></i> Unlike
-            </button>
-        </form>
-<%
-                    } else {
-%>
-        <!-- Show Like Button -->
-        <form action="like_blog.jsp" method="post" style="display:inline;">
-            <input type="hidden" name="id" value="<%= rs.getString("id") %>">
-            <button type="submit" class="btn btn-success btn-like">
-                <i class="bi bi-hand-thumbs-up"></i> Like
-            </button>
-        </form>
-<%
-                    }
-                } else {
-%>
-        <!-- First time - Show Like Button -->
-        <form action="like_blog.jsp" method="post" style="display:inline;">
-            <input type="hidden" name="id" value="<%= rs.getString("id") %>">
-            <button type="submit" class="btn btn-success btn-like">
-                <i class="bi bi-hand-thumbs-up"></i> Like
-            </button>
-        </form>
-<%
-                }
-            } else {
-                out.println("<p class='text-danger'>Blog not found.</p>");
-            }
-            conn.close();
-        } catch (Exception e) {
-            out.println("<p class='text-danger'>Error: " + e.getMessage() + "</p>");
         }
     }
 %>
