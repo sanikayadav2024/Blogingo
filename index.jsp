@@ -207,7 +207,7 @@ try {
         out.println("<p>DB_PASS = " + (dbPass != null ? "****" : "null") + "</p>");
     } else {
         Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPass);
-        String sql = "SELECT * FROM public_blogs ORDER BY created_at DESC";
+        String sql = "SELECT * FROM public_blogs WHERE author='Admin' ORDER BY created_at DESC";
         PreparedStatement ps = conn.prepareStatement(sql);
         ResultSet rs = ps.executeQuery();
         boolean hasPublicBlogs = false;
