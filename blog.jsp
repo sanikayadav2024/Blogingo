@@ -119,7 +119,7 @@
 
 <%
                     if (username != null) {
-                        PreparedStatement checkReaction = conn.prepareStatement("SELECT liked FROM blogs WHERE blog_id=? AND username=?");
+                        PreparedStatement checkReaction = conn.prepareStatement("SELECT liked FROM blog_likes WHERE blog_id=? AND username=?");
                         checkReaction.setString(1, blogId);
                         checkReaction.setString(2, username);
                         ResultSet reactionRs = checkReaction.executeQuery();
