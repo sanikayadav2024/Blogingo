@@ -78,7 +78,6 @@
 
 <%@ include file="navbar.jsp" %>
 
-<div class="blog-container">
 <%
     String blogId = request.getParameter("id");
     String username = (String) session.getAttribute("username");
@@ -86,39 +85,95 @@
     if (blogId == null || blogId.trim().equals("")) {
         out.println("<p class='text-danger'>Invalid blog ID provided.</p>");
     } else {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/bloggingo", "root", "");
 
-            // Fetch Blog
-            PreparedStatement ps = conn.prepareStatement("SELECT * FROM blogs WHERE id=?");
-            ps.setString(1, blogId);
-            ResultSet rs = ps.executeQuery();
+            String dbUrl = System.getenv("DB_URL");
+            String dbUser = System.getenv("DB_USER");
+            String dbPass = System.getenv("DB_PASS");
 
-            if (rs.next()) {
+            if (dbUrl == null || dbUser == null || dbPass == null) {
+                out.println("<p class='text-danger'>Error: One or more DB environment variables are missing.</p>");
+            } else {
+                conn = DriverManager.getConnection(dbUrl, dbUser, dbPass);
+
+                ps = conn.prepareStatement("SELECT * FROM blogs WHERE id=?");
+                ps.setString(1, blogId);
+                rs = ps.executeQuery();
+
+                if (rs.next()) {
 %>
-        <h2><%= rs.getString("title") %></h2>
-        <p class="blog-meta">By <%= rs.getString("author") %> | Posted on: <%= rs.getString("created_at") %></p>
-        <hr>
-        <div class="blog-content"><%= rs.getString("content") %></div>
+    <h2><%= rs.getString("title") %></h2>
+    <p class="blog-meta">By <%= rs.getString("author") %> | Posted on: <%= rs.getString("created_at") %></p>
+    <hr>
+    <div class="blog-content"><%= rs.getString("content") %></div>
 
-        <p class="likes-count">
-            <i class="bi bi-hand-thumbs-up-fill"></i> <strong><%= rs.getInt("likes") %></strong> Likes &nbsp;
-            <i class="bi bi-hand-thumbs-down-fill text-danger"></i> <strong><%= rs.getInt("unlikes") %></strong> Unlikes
-        </p>
+    <p class="likes-count">
+        <i class="bi bi-hand-thumbs-up-fill"></i> <strong><%= rs.getInt("likes") %></strong> Likes &nbsp;
+        <i class="bi bi-hand-thumbs-down-fill text-danger"></i> <strong><%= rs.getInt("unlikes") %></strong> Unlikes
+    </p>
 
 <%
-                // Check user's reaction
-                PreparedStatement checkReaction = conn.prepareStatement("SELECT liked FROM blog_likes WHERE blog_id=? AND username=?");
-                checkReaction.setString(1, blogId);
-                checkReaction.setString(2, username);
-                ResultSet reactionRs = checkReaction.executeQuery();
+                    PreparedStatement checkReaction = conn.prepareStatement("SELECT liked FROM blog_likes WHERE blog_id=? AND username=?");
+                    checkReaction.setString(1, blogId);
+                    checkReaction.setString(2, username);
+                    ResultSet reactionRs = checkReaction.executeQuery();
 
-                if (reactionRs.next()) {
-                    boolean liked = reactionRs.getBoolean("liked");
+                    if (reactionRs.next()) {
+                        boolean liked = reactionRs.getBoolean("liked");
 
-                    if (liked) {
+                        if (liked) {
 %>
+    <!-- Show Unlike Button -->
+    <form action="unlike_blog.jsp" method="post" style="display:inline;">
+        <input type="hidden" name="id" value="<%= rs.getString("id") %>">
+        <button type="submit" class="btn btn-outline-danger btn-unlike">
+            <i class="bi bi-hand-thumbs-down"></i> Unlike
+        </button>
+    </form>
+<%
+                        } else {
+%>
+    <!-- Show Like Button -->
+    <form action="like_blog.jsp" method="post" style="display:inline;">
+        <input type="hidden" name="id" value="<%= rs.getString("id") %>">
+        <button type="submit" class="btn btn-success btn-like">
+            <i class="bi bi-hand-thumbs-up"></i> Like
+        </button>
+    </form>
+<%
+                        }
+                    } else {
+%>
+    <!-- First time - Show Like Button -->
+    <form action="like_blog.jsp" method="post" style="display:inline;">
+        <input type="hidden" name="id" value="<%= rs.getString("id") %>">
+        <button type="submit" class="btn btn-success btn-like">
+            <i class="bi bi-hand-thumbs-up"></i> Like
+        </button>
+    </form>
+<%
+                    }
+                    reactionRs.close();
+                    checkReaction.close();
+                } else {
+                    out.println("<p class='text-danger'>Blog not found.</p>");
+                }
+            }
+        } catch (Exception e) {
+            out.println("<p class='text-danger'>Error: " + e.getMessage() + "</p>");
+        } finally {
+            try { if (rs != null) rs.close(); } catch (Exception ignore) {}
+            try { if (ps != null) ps.close(); } catch (Exception ignore) {}
+            try { if (conn != null) conn.close(); } catch (Exception ignore) {}
+        }
+    }
+%>
+
         <!-- Show Unlike Button -->
         <form action="unlike_blog.jsp" method="post" style="display:inline;">
             <input type="hidden" name="id" value="<%= rs.getString("id") %>">
