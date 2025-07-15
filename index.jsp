@@ -218,39 +218,58 @@ try {
         <% } %>
 
         <% if (user != null) { %>
-            <div class="text-center">
-                <a href="dashboard.jsp" class="btn btn-dark mt-4"><i class="bi bi-upload"></i> Upload Your Blog</a>
-            </div>
+    <div class="text-center">
+        <a href="dashboard.jsp" class="btn btn-dark mt-4"><i class="bi bi-upload"></i> Upload Your Blog</a>
+    </div>
 
-            <h2 class="mt-5 mb-4">All Blogs</h2>
-            <div class="blog-grid">
-                <% try {
-                    Class.forName("com.mysql.cj.jdbc.Driver");
-                    Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/bloggingo", "root", "");
+    <h2 class="mt-5 mb-4">All Blogs</h2>
+    <div class="blog-grid">
+        <% 
+            try {
+                Class.forName("com.mysql.cj.jdbc.Driver");
+
+                // Fetch database credentials from environment variables
+                String dbUrl = System.getenv("DB_URL");
+                String dbUser = System.getenv("DB_USER");
+                String dbPass = System.getenv("DB_PASS");
+
+                if (dbUrl == null || dbUser == null || dbPass == null) {
+                    out.println("<p class='text-danger'>Database environment variables are not set.</p>");
+                } else {
+                    Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPass);
                     String sql = "SELECT * FROM blogs ORDER BY created_at DESC";
                     PreparedStatement ps = conn.prepareStatement(sql);
                     ResultSet rs = ps.executeQuery();
                     boolean hasBlogs = false;
-                    while (rs.next()) { hasBlogs = true; %>
+
+                    while (rs.next()) {
+                        hasBlogs = true;
+        %>
                         <div class="blog">
                             <h4><%= rs.getString("title") %></h4>
                             <p><%= rs.getString("content") %></p>
-                            <small class="text-muted">Author: <%= rs.getString("author") %> | Posted on: <%= rs.getString("created_at") %></small>
+                            <small class="text-muted">
+                                Author: <%= rs.getString("author") %> | Posted on: <%= rs.getString("created_at") %>
+                            </small>
                             <br>
                             <a href="blog.jsp?id=<%= rs.getString("id") %>" class="read-more">Read More</a>
                         </div>
-                    <% }
-                    if (!hasBlogs) { out.println("<p>No blogs posted yet.</p>"); }
+        <%
+                    }
+                    if (!hasBlogs) {
+                        out.println("<p>No blogs posted yet.</p>");
+                    }
                     conn.close();
-                } catch (Exception e) {
-                    out.println("<p class='text-danger'>Error: " + e.getMessage() + "</p>");
-                } %>
-            </div>
-        <% } else { %>
-            <p class="text-center mt-4">Please <a href="login.jsp">login</a> to view all blogs and upload your own.</p>
-        <% } %>
+                }
+            } catch (Exception e) {
+                out.println("<p class='text-danger'>Error: " + e.getMessage() + "</p>");
+            }
+        %>
     </div>
-
+<% } else { %>
+    <p class="text-center mt-4">Please <a href="login.jsp">login</a> to view all blogs and upload your own.</p>
+<% } %>
+</div>
     <div class="floating-icons">
         <i class="bi bi-pencil-fill"></i>
         <i class="bi bi-journal-text"></i>
