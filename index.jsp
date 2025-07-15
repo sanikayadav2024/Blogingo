@@ -116,9 +116,6 @@
 <body>
 <%@ include file="navbar.jsp" %>
 
-<%
-    String user = (session.getAttribute("username") != null) ? (String) session.getAttribute("username") : null;
-%>
 
 <div class="main-content container">
 
