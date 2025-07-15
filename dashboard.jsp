@@ -83,7 +83,6 @@
 <body>
 
 <%@ include file="navbar.jsp" %>
-
 <div class="container">
 <%
     String username = (String) session.getAttribute("username");
@@ -92,14 +91,13 @@
         return;
     }
 
+    // Load DB env variables
     String dbUrl = System.getenv("DB_URL");
     String dbUser = System.getenv("DB_USER");
     String dbPass = System.getenv("DB_PASS");
 
     if (dbUrl == null || dbUser == null || dbPass == null) {
-%>
-        <p class="text-danger">Error: Database environment variables (DB_URL, DB_USER, DB_PASS) are not set.</p>
-<%
+        out.println("<p class='text-danger'>Error: DB environment variables (DB_URL, DB_USER, DB_PASS) are not set.</p>");
     } else {
 %>
 
@@ -120,17 +118,15 @@
             try {
                 Class.forName("com.mysql.cj.jdbc.Driver");
                 Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPass);
-
                 PreparedStatement ps = conn.prepareStatement("INSERT INTO blogs(title, content, author) VALUES (?, ?, ?)");
                 ps.setString(1, title);
                 ps.setString(2, content);
                 ps.setString(3, username);
                 ps.executeUpdate();
-
                 out.println("<p class='success'>Blog posted successfully!</p>");
                 conn.close();
             } catch (Exception e) {
-                out.println("<p class='text-danger'>Error: " + e.getMessage() + "</p>");
+                out.println("<p style='color:red;'>Error: " + e.getMessage() + "</p>");
             }
         }
 %>
@@ -145,7 +141,6 @@
             PreparedStatement ps = conn.prepareStatement("SELECT * FROM blogs WHERE author=? ORDER BY created_at DESC");
             ps.setString(1, username);
             ResultSet rs = ps.executeQuery();
-
             boolean hasBlogs = false;
 
             while (rs.next()) {
@@ -172,12 +167,13 @@
             }
             conn.close();
         } catch (Exception e) {
-            out.println("<p class='text-danger'>Error loading blogs: " + e.getMessage() + "</p>");
+            out.println("<p style='color:red;'>Error: " + e.getMessage() + "</p>");
         }
-    } // End of DB env check
+    } // end of env check
 %>
 
 </div>
+
 
 <%@ include file="footer.jsp" %>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
