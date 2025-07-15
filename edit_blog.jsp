@@ -1,8 +1,6 @@
 <%@ page import="java.sql.*" %>
-
 <%@ include file="navbar.jsp" %>
 <%
-   
     if (user == null) {
         response.sendRedirect("login.jsp");
         return;
@@ -18,6 +16,16 @@
         return;
     }
 
+    // Get env vars for Railway
+    String dbUrl = System.getenv("DB_URL");
+    String dbUser = System.getenv("DB_USER");
+    String dbPass = System.getenv("DB_PASS");
+
+    if (dbUrl == null || dbUser == null || dbPass == null) {
+        out.println("<p class='text-danger'>Error: Database environment variables not configured.</p>");
+        return;
+    }
+
     // Check if form is submitted (POST)
     if ("POST".equalsIgnoreCase(request.getMethod())) {
         String updatedTitle = request.getParameter("title");
@@ -25,7 +33,7 @@
 
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/bloggingo", "root", "");
+            Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPass);
 
             String updateSql = "UPDATE blogs SET title=?, content=? WHERE id=? AND author=?";
             PreparedStatement psUpdate = conn.prepareStatement(updateSql);
@@ -50,7 +58,7 @@
         // GET Request - fetch blog details
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/bloggingo", "root", "");
+            Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPass);
 
             String sql = "SELECT * FROM blogs WHERE id=?";
             PreparedStatement ps = conn.prepareStatement(sql);
@@ -80,29 +88,3 @@
         }
     }
 %>
-
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Edit Blog - BloginGo</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="container mt-5">
-    <h2>Edit Blog</h2>
-
-    <form method="post">
-        <div class="mb-3">
-            <label class="form-label">Title</label>
-            <input type="text" name="title" class="form-control" value="<%= title %>" required>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Content</label>
-            <textarea name="content" class="form-control" rows="6" required><%= content %></textarea>
-        </div>
-
-        <button type="submit" class="btn btn-primary">Update Blog</button>
-        <a href="index.jsp" class="btn btn-secondary">Cancel</a>
-    </form>
-</body>
-</html>
