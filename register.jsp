@@ -95,31 +95,44 @@
         String password = request.getParameter("password");
 
         Connection conn = null;
+        PreparedStatement pst = null;
+
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            conn = DriverManager.getConnection("jdbc:mysql://localhost/bloggingo", "root", "");
 
-            PreparedStatement pst = conn.prepareStatement("INSERT INTO users(username, email, password) VALUES (?, ?, ?)");
-            pst.setString(1, username);
-            pst.setString(2, email);
-            pst.setString(3, password);
+            String dbUrl = System.getenv("DB_URL");
+            String dbUser = System.getenv("DB_USER");
+            String dbPass = System.getenv("DB_PASS");
 
-            int rows = pst.executeUpdate();
-            if (rows > 0) {
+            if (dbUrl == null || dbUser == null || dbPass == null) {
 %>
-            <p style="color:green; margin-top:15px;">Registration Successful! <a href="login.jsp">Login Now</a></p>
+                <p style="color:red;">Error: One or more DB environment variables are missing.</p>
 <%
             } else {
+                conn = DriverManager.getConnection(dbUrl, dbUser, dbPass);
+                pst = conn.prepareStatement("INSERT INTO users(username, email, password) VALUES (?, ?, ?)");
+                pst.setString(1, username);
+                pst.setString(2, email);
+                pst.setString(3, password);
+
+                int rows = pst.executeUpdate();
+                if (rows > 0) {
 %>
-            <p style="color:red; margin-top:15px;">Registration Failed. Please try again.</p>
+                    <p style="color:green; margin-top:15px;">Registration Successful! <a href="login.jsp">Login Now</a></p>
 <%
+                } else {
+%>
+                    <p style="color:red; margin-top:15px;">Registration Failed. Please try again.</p>
+<%
+                }
             }
         } catch (Exception e) {
 %>
             <p style="color:red;">Error: <%= e.getMessage() %></p>
 <%
         } finally {
-            if (conn != null) conn.close();
+            try { if (pst != null) pst.close(); } catch (Exception ignore) {}
+            try { if (conn != null) conn.close(); } catch (Exception ignore) {}
         }
     }
 %>
