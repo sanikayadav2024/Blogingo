@@ -189,55 +189,58 @@
             <p class="text-end">Welcome, <strong><%= user %></strong></p>
         <% } %>
 
-        <% if (user == null) { %>
-           <h2 class="mb-4">Public Blogs</h2>
-<div class="blog-grid">
-<%
-try {
-    Class.forName("com.mysql.cj.jdbc.Driver");
-
-    String dbUrl = System.getenv("DB_URL");
-    String dbUser = System.getenv("DB_USER");
-    String dbPass = System.getenv("DB_PASS");
-
-    if (dbUrl == null || dbUser == null || dbPass == null) {
-        out.println("<p class='text-danger'>Error: One or more DB environment variables are missing.</p>");
-        out.println("<p>DB_URL = " + dbUrl + "</p>");
-        out.println("<p>DB_USER = " + dbUser + "</p>");
-        out.println("<p>DB_PASS = " + (dbPass != null ? "****" : "null") + "</p>");
-    } else {
-        Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPass);
-        String sql = "SELECT * FROM public_blogs WHERE author='Admin' ORDER BY created_at DESC";
-        PreparedStatement ps = conn.prepareStatement(sql);
-        ResultSet rs = ps.executeQuery();
-        boolean hasPublicBlogs = false;
-
-        while (rs.next()) {
-            hasPublicBlogs = true;
+       <%
+    String user = (String) session.getAttribute("username");
 %>
-            <div class="blog">
-                <h4><%= rs.getString("title") %></h4>
-                <p><%= rs.getString("content") %></p>
-                <small class="text-muted">
-                    Author: <%= rs.getString("author") %> | Posted on: <%= rs.getString("created_at") %>
-                </small>
-                <br><a href="welcome.jsp" class="read-more">Read More</a>
-            </div>
-<%
-        }
-        if (!hasPublicBlogs) {
-            out.println("<p>No public blogs available at the moment.</p>");
-        }
 
-        rs.close();
-        ps.close();
-        conn.close();
-    }
-} catch (Exception e) {
-    out.println("<p class='text-danger'>Error: " + e.getMessage() + "</p>");
-}
-%>
-</div>
+<% if (user == null) { %>
+    <h2 class="mb-4">Public Blogs</h2>
+    <div class="blog-grid">
+    <%
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+
+            String dbUrl = System.getenv("DB_URL");
+            String dbUser = System.getenv("DB_USER");
+            String dbPass = System.getenv("DB_PASS");
+
+            if (dbUrl == null || dbUser == null || dbPass == null) {
+                out.println("<p class='text-danger'>Database environment variables are missing.</p>");
+            } else {
+                Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPass);
+                String sql = "SELECT * FROM public_blogs WHERE author='Admin' ORDER BY created_at DESC";
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery();
+
+                boolean hasPublicBlogs = false;
+                while (rs.next()) {
+                    hasPublicBlogs = true;
+    %>
+        <div class="blog">
+            <h4><%= rs.getString("title") %></h4>
+            <p><%= rs.getString("content") %></p>
+            <small class="text-muted">
+                Author: <%= rs.getString("author") %> | Posted on: <%= rs.getString("created_at") %>
+            </small>
+            <br>
+            <a href="welcome.jsp" class="read-more">Read More</a>
+        </div>
+    <%
+                }
+                if (!hasPublicBlogs) {
+                    out.println("<p>No public blogs available right now.</p>");
+                }
+
+                rs.close();
+                ps.close();
+                conn.close();
+            }
+        } catch (Exception e) {
+            out.println("<p class='text-danger'>Error: " + e.getMessage() + "</p>");
+        }
+    %>
+    </div>
+<% } %>
 
         <% if (user != null) { %>
     <div class="text-center">
