@@ -208,6 +208,13 @@ try {
     } else {
         Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPass);
         // ... Your code to run the SQL query ...
+ while (rs.next()) { hasPublicBlogs = true; %>
+                        <div class="blog">
+                            <h4><%= rs.getString("title") %></h4>
+                            <p><%= rs.getString("content") %></p>
+                            <small class="text-muted">Author: <%= rs.getString("author") %> | Posted on: <%= rs.getString("created_at") %></small>
+                            <br><a href="welcome.jsp" class="read-more">Read More</a>
+                        </div>
     }
 } catch (Exception e) {
     out.println("<p class='text-danger'>Error: " + e.getMessage() + "</p>");
