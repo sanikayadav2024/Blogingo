@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" import="java.sql.*" session="true" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="java.sql.*" session="true" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,6 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <style>
+        /* Your CSS styles are unchanged */
         body {
             margin: 0;
             font-family: 'Segoe UI', Arial, sans-serif;
@@ -116,40 +117,27 @@
 <%@ include file="navbar.jsp" %>
 
 <%
-    String user = (String) session.getAttribute("username");
+    String user = (session.getAttribute("username") != null) ? (String) session.getAttribute("username") : null;
 %>
 
 <div class="main-content container">
 
-    <!-- Intro Section -->
+    <!-- Intro -->
     <div class="intro-section">
         <h1 class="text-center mb-3">Welcome to <span style="color:#0d6efd;">BloginGo</span></h1>
         <p class="lead text-center">Your space to share ideas, inspire others, and build your writing journey.</p>
     </div>
 
-    <!-- Steps Section -->
+    <!-- Steps -->
     <div class="steps-section">
         <h3 class="text-center mb-4">Get Started in 3 Simple Steps</h3>
         <div class="steps-cards">
-            <div class="step-card">
-                <i class="bi bi-lightbulb"></i>
-                <h5>Choose Your Topic</h5>
-                <p>Pick a topic you're passionate about—technology, travel, lifestyle, anything!</p>
-            </div>
-            <div class="step-card">
-                <i class="bi bi-pencil-square"></i>
-                <h5>Write Your Blog</h5>
-                <p>Express your thoughts, add images, and create engaging content easily.</p>
-            </div>
-            <div class="step-card">
-                <i class="bi bi-cloud-upload"></i>
-                <h5>Upload & Share</h5>
-                <p>Post your blog and share your knowledge with the world. It's that simple!</p>
-            </div>
+            <div class="step-card"><i class="bi bi-lightbulb"></i><h5>Choose Your Topic</h5><p>Pick a topic you're passionate about.</p></div>
+            <div class="step-card"><i class="bi bi-pencil-square"></i><h5>Write Your Blog</h5><p>Create engaging content easily.</p></div>
+            <div class="step-card"><i class="bi bi-cloud-upload"></i><h5>Upload & Share</h5><p>Share your blog with the world!</p></div>
         </div>
     </div>
 
-    <!-- Show Public Blogs -->
     <% if (user == null) { %>
         <h2 class="mb-4">Public Blogs</h2>
         <div class="blog-grid">
@@ -160,12 +148,9 @@
                 String dbUser = System.getenv("DB_USER");
                 String dbPass = System.getenv("DB_PASS");
 
-                if (dbUrl == null || dbUser == null || dbPass == null) {
-                    out.println("<p class='text-danger'>Error: DB credentials not set.</p>");
-                } else {
+                if (dbUrl != null && dbUser != null && dbPass != null) {
                     Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPass);
-                    String sql = "SELECT * FROM public_blogs ORDER BY created_at DESC";
-                    PreparedStatement ps = conn.prepareStatement(sql);
+                    PreparedStatement ps = conn.prepareStatement("SELECT * FROM public_blogs ORDER BY created_at DESC");
                     ResultSet rs = ps.executeQuery();
                     boolean found = false;
 
@@ -183,18 +168,17 @@
                     if (!found) {
                         out.println("<p>No public blogs available at the moment.</p>");
                     }
-
                     rs.close(); ps.close(); conn.close();
+                } else {
+                    out.println("<p class='text-danger'>DB environment variables not set.</p>");
                 }
             } catch (Exception e) {
                 out.println("<p class='text-danger'>Error: " + e.getMessage() + "</p>");
             }
         %>
         </div>
-    <% } %>
+    <% } else { %>
 
-    <!-- If Logged In: Show All Blogs -->
-    <% if (user != null) { %>
         <p class="text-end">Welcome, <strong><%= user %></strong></p>
 
         <div class="text-center">
@@ -210,17 +194,14 @@
                 String dbUser = System.getenv("DB_USER");
                 String dbPass = System.getenv("DB_PASS");
 
-                if (dbUrl == null || dbUser == null || dbPass == null) {
-                    out.println("<p class='text-danger'>Database environment variables not set.</p>");
-                } else {
+                if (dbUrl != null && dbUser != null && dbPass != null) {
                     Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPass);
-                    String sql = "SELECT * FROM blogs ORDER BY created_at DESC";
-                    PreparedStatement ps = conn.prepareStatement(sql);
+                    PreparedStatement ps = conn.prepareStatement("SELECT * FROM blogs ORDER BY created_at DESC");
                     ResultSet rs = ps.executeQuery();
+                    boolean found = false;
 
-                    boolean hasBlogs = false;
                     while (rs.next()) {
-                        hasBlogs = true;
+                        found = true;
         %>
             <div class="blog">
                 <h4><%= rs.getString("title") %></h4>
@@ -230,10 +211,12 @@
             </div>
         <%
                     }
-                    if (!hasBlogs) {
+                    if (!found) {
                         out.println("<p>No blogs posted yet.</p>");
                     }
                     rs.close(); ps.close(); conn.close();
+                } else {
+                    out.println("<p class='text-danger'>DB environment variables not set.</p>");
                 }
             } catch (Exception e) {
                 out.println("<p class='text-danger'>Error: " + e.getMessage() + "</p>");
@@ -241,7 +224,6 @@
         %>
         </div>
     <% } %>
-
 </div>
 
 <!-- Floating Icons -->
