@@ -88,39 +88,56 @@
 
         <a href="register.jsp">Don't have an account? Register</a>
 
-        <% 
+        <%
             if (request.getMethod().equalsIgnoreCase("post")) {
                 String username = request.getParameter("username");
                 String password = request.getParameter("password");
 
+                Connection conn = null;
+                PreparedStatement pst = null;
+                ResultSet rs = null;
+
                 try {
                     Class.forName("com.mysql.cj.jdbc.Driver");
-                    Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/bloggingo", "root", "");
 
-                    PreparedStatement pst = conn.prepareStatement("SELECT * FROM users WHERE username = ? AND password = ?");
-                    pst.setString(1, username);
-                    pst.setString(2, password);
-                    ResultSet rs = pst.executeQuery();
+                    String dbUrl = System.getenv("DB_URL");
+                    String dbUser = System.getenv("DB_USER");
+                    String dbPass = System.getenv("DB_PASS");
 
-                    if (rs.next()) {
-                        session.setAttribute("username", username);
-                        session.setAttribute("userId", rs.getInt("id"));
+                    if (dbUrl == null || dbUser == null || dbPass == null) {
         %>
-                        <p style="color:green; margin-top:15px;">Login Successful! Redirecting...</p>
-                        <script>
-                            setTimeout(() => { window.location.href = 'index.jsp'; }, 1500);
-                        </script>
+                        <p style="color:red;">Error: One or more DB environment variables are missing.</p>
         <%
                     } else {
+                        conn = DriverManager.getConnection(dbUrl, dbUser, dbPass);
+                        pst = conn.prepareStatement("SELECT * FROM users WHERE username = ? AND password = ?");
+                        pst.setString(1, username);
+                        pst.setString(2, password);
+                        rs = pst.executeQuery();
+
+                        if (rs.next()) {
+                            session.setAttribute("username", username);
+                            session.setAttribute("userId", rs.getInt("id"));
         %>
-                        <p style="color:red; margin-top:15px;">Invalid username or password.</p>
+                            <p style="color:green; margin-top:15px;">Login Successful! Redirecting...</p>
+                            <script>
+                                setTimeout(() => { window.location.href = 'index.jsp'; }, 1500);
+                            </script>
         <%
+                        } else {
+        %>
+                            <p style="color:red; margin-top:15px;">Invalid username or password.</p>
+        <%
+                        }
                     }
-                    conn.close();
                 } catch (Exception e) {
         %>
                     <p style="color:red;">Error: <%= e.getMessage() %></p>
         <%
+                } finally {
+                    try { if (rs != null) rs.close(); } catch (Exception ignore) {}
+                    try { if (pst != null) pst.close(); } catch (Exception ignore) {}
+                    try { if (conn != null) conn.close(); } catch (Exception ignore) {}
                 }
             }
         %>
