@@ -149,8 +149,7 @@
         <div class="blog">
             <h5><%= rs.getString("title") %></h5>
             <p><%= rs.getString("content") %></p>
-            <small class="text-muted">Posted on: <%= rs.getString("created_at") %></small>
-
+           
             <div class="action-buttons">
                 <a href="edit_blog.jsp?id=<%= rs.getString("id") %>" class="btn btn-sm btn-outline-primary me-2">
                     <i class="bi bi-pencil-square"></i> Edit
