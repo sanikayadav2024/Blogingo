@@ -21,6 +21,11 @@
     String dbUser = System.getenv("DB_USER");
     String dbPass = System.getenv("DB_PASS");
 
+    // Convert Railway-style plain DB_URL to JDBC if needed
+    if (dbUrl != null && !dbUrl.startsWith("jdbc:")) {
+        dbUrl = "jdbc:mysql://" + dbUrl + "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
+    }
+
     if (dbUrl == null || dbUser == null || dbPass == null) {
         out.println("<p class='text-danger'>Error: Database environment variables not configured.</p>");
         return;
@@ -88,3 +93,20 @@
         }
     }
 %>
+
+<!-- Blog Edit Form -->
+<div class="container mt-4">
+    <h2>Edit Blog</h2>
+    <form method="post">
+        <div class="mb-3">
+            <label for="title" class="form-label">Blog Title</label>
+            <input type="text" class="form-control" id="title" name="title" value="<%= title %>" required>
+        </div>
+        <div class="mb-3">
+            <label for="content" class="form-label">Content</label>
+            <textarea class="form-control" id="content" name="content" rows="10" required><%= content %></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Update Blog</button>
+        <a href="index.jsp" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
