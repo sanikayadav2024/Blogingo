@@ -108,7 +108,7 @@
                     int unlikes = rs.getInt("unlikes");
 %>
     <h2><%= title %></h2>
-    <p class="blog-meta">By <%= author %> | Posted on: <%= createdAt %></p>
+    <p class="blog-meta">By <%= author %> | </p>
     <hr>
     <div class="blog-content"><%= content %></div>
 
