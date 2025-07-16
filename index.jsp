@@ -155,7 +155,7 @@
             <div class="blog">
                 <h4><%= rs.getString("title") %></h4>
                 <p><%= rs.getString("content") %></p>
-                <small class="text-muted">Author: <%= rs.getString("author") %> | Posted: <%= rs.getString("created_at") %></small>
+                <small class="text-muted">Author: <%= rs.getString("author") %> |</small>
                 <br><a href="welcome.jsp" class="read-more">Read More</a>
             </div>
         <%
@@ -201,7 +201,7 @@
             <div class="blog">
                 <h4><%= rs.getString("title") %></h4>
                 <p><%= rs.getString("content") %></p>
-                <small class="text-muted">Author: <%= rs.getString("author") %> | Posted: <%= rs.getString("created_at") %></small>
+                <small class="text-muted">Author: <%= rs.getString("author") %> | </small>
                 <br><a href="blog.jsp?id=<%= rs.getString("id") %>" class="read-more">Read More</a>
             </div>
         <%
