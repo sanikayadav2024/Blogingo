@@ -4,6 +4,7 @@
 <html lang="en">
 <head>
     <title>Register - BloginGo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -24,11 +25,11 @@
 
         .register-container {
             background-color: white;
-            padding: 30px;
+            padding: 30px 20px;
             border-radius: 10px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            width: 320px;
-            text-align: center;
+            width: 100%;
+            max-width: 400px;
             animation: fadeIn 0.8s ease;
         }
 
@@ -37,7 +38,7 @@
         }
 
         .register-container input {
-            width: 90%;
+            width: 100%;
             padding: 10px;
             margin: 10px 0;
             border: 1px solid #ddd;
@@ -45,7 +46,8 @@
         }
 
         .register-container button {
-            padding: 10px 20px;
+            width: 100%;
+            padding: 10px;
             background-color: #343a40;
             color: white;
             border: none;
@@ -56,7 +58,7 @@
 
         .register-container button:hover {
             background-color: #495057;
-            transform: scale(1.05);
+            transform: scale(1.02);
         }
 
         .register-container a {
