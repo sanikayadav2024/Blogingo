@@ -5,6 +5,7 @@
 <html lang="en">
 <head>
     <title>Login - BloginGo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -25,39 +26,44 @@
 
         .login-container {
             background-color: white;
-            padding: 30px;
+            padding: 30px 20px;
             border-radius: 10px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            width: 320px;
+            width: 100%;
+            max-width: 400px;
             text-align: center;
             animation: fadeIn 0.8s ease;
         }
 
         .login-container h2 {
             margin-bottom: 20px;
+            font-size: 1.5rem;
         }
 
         .login-container input {
-            width: 90%;
-            padding: 10px;
+            width: 100%;
+            padding: 12px;
             margin: 10px 0;
             border: 1px solid #ddd;
             border-radius: 5px;
+            font-size: 1rem;
         }
 
         .login-container button {
-            padding: 10px 20px;
+            width: 100%;
+            padding: 12px;
             background-color: #343a40;
             color: white;
             border: none;
             border-radius: 5px;
+            font-size: 1rem;
             cursor: pointer;
             transition: background-color 0.3s, transform 0.2s;
         }
 
         .login-container button:hover {
             background-color: #495057;
-            transform: scale(1.05);
+            transform: scale(1.03);
         }
 
         .login-container a {
@@ -65,11 +71,22 @@
             margin-top: 15px;
             text-decoration: none;
             color: #007BFF;
+            font-size: 0.9rem;
         }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 25px 15px;
+            }
+
+            .login-container h2 {
+                font-size: 1.3rem;
+            }
         }
     </style>
 </head>
